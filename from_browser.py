@@ -1,12 +1,10 @@
 import csv
 import os
 import re
-import time
 import requests
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -148,6 +146,9 @@ def save_to_csv(jobs):
     if not new_jobs:
         print("No new jobs to add.")
         return
+
+    new_jobs = sorted(new_jobs, reverse=True, key=lambda d: datetime.strptime(
+        d['Date Published'], "%Y-%m-%d"))
 
     file_exists = os.path.isfile(CSV_FILE)
     with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:

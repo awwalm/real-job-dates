@@ -30,9 +30,9 @@ def search(query: list[str], filters: dict[str, list[str]]):
     titles_matched = False
     locations_matched = False
     for title, location in zip(filters['titles'], filters['locations']):
-        if title.lower() in title_q.lower():
+        if not titles_matched and title.lower() in title_q.lower():
             titles_matched = True
-        if location.lower() in location_q.lower():
+        if not locations_matched and location.lower() in location_q.lower():
             locations_matched = True
         if locations_matched and titles_matched:
             return True
@@ -112,11 +112,15 @@ def main():
     for job in all_jobs:
         print(f"Fetching publish date for '{job['Title']}'...")
         pub_date = get_published_date(job["Token"])
+        print(pub_date)
         job["Date Published"] = pub_date
         final_jobs.append(job)
 
     print(f"Writing {len(final_jobs)} jobs to {CSV_FILE}...")
-    save_to_csv(final_jobs)
+    # save_to_csv(final_jobs)
+    save_to_csv(sorted(final_jobs, reverse=True, key=lambda d: datetime.strptime(
+        d['Date Published'], "%Y-%m-%d"))
+    )
     print("Done.")
 
 
