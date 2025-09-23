@@ -5,9 +5,12 @@ import requests
 from datetime import datetime
 
 # --- Configuration ---
-CSV_FILE = "stripe_jobs_from_api.csv"
-JOBS_API_URL = "https://boards-api.greenhouse.io/v1/boards/stripe/jobs"
-API_URL_BASE = "https://job-boards.greenhouse.io/embed/job_app?for=stripe&token="
+COMPANIES = {'lyft': 'lyft', 'stripe': 'stripe'}
+ORG = COMPANIES.get(input(f"Enter a company name (must be one of {list(COMPANIES.keys())}): ").lower())
+if not ORG: ORG = 'stripe'
+CSV_FILE = f"{ORG}_jobs_from_api.csv"
+JOBS_API_URL = f"https://boards-api.greenhouse.io/v1/boards/{ORG}/jobs"
+API_URL_BASE = f"https://job-boards.greenhouse.io/embed/job_app?for={ORG}&token="
 SEARCH_FILTERS = {
     'titles': [
         'engineer', 'backend', 'back end', 'fullstack',
@@ -22,6 +25,7 @@ SEARCH_FILTERS = {
         'amsterdam', 'netherlands', 'melbourne'
     ],
 }
+
 
 
 def search(query: list[str], filters: dict[str, list[str]]):

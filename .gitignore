@@ -8,6 +8,7 @@ rotations.py
 
 *.bin
 *.csv
+notes.md
 
 __pycache__/
 *.py[cod]
