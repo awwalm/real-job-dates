@@ -11,13 +11,13 @@ It simply uses their public job board endpoints. Use responsibly.**
 
 ## What's Inside
 
-### 🎯 **Single Company Scrapers**
-Perfect for targeted searches with user input:
+### **Single Company Scrapers**
+Targeted searches with user input:
 - **Greenhouse scraper**: Works with Stripe, Lyft, and other Greenhouse-powered boards
 - **Lever scraper**: Works with Netflix, Spotify, Airbnb, and other Lever-powered boards
 
-### 🚀 **Batch Scrapers** 
-The heavy hitters - scrape multiple companies automatically:
+### **Batch Scrapers** 
+Scrape multiple companies automatically:
 - **Greenhouse batch**: 10 visa-friendly companies (Stripe, GitLab, Coinbase, DoorDash, etc.)
 - **Lever batch**: 10 global/remote-first companies (Netflix, Spotify, Figma, Discord, etc.)
 
@@ -44,25 +44,18 @@ All scrapers are optimized for locations like Canada, Ireland, Singapore, Austra
 
 ## Usage
 
-### Single Company Scraping
-```bash
-python greenhouse_scraper.py  # Interactive - choose Stripe, Lyft, etc.
-python lever_scraper.py       # Interactive - choose Netflix, Spotify, etc.
-```
+Each module has single and batch company scrapers (`.py` files you can execute or customized as you wish),
+ with the choice of API or frontend oriented extraction.
 
-### Batch Scraping (Recommended)
-```bash
-python greenhouse_batch_scraper.py  # Scrapes all 10 Greenhouse companies
-python lever_batch_scraper.py       # Scrapes all 10 Lever companies
-```
+## Companies Covered <sup>*</sup>
 
-Results will be written to:
-- `[platform]_[company]_jobs.csv` for individual companies
-- Combine them all with the pro tips shown in the output
+> [!NOTE]  
+> \* This list is constantly being updated and is only provisional.
 
-## Companies Covered (so far...)
+> [!TIP]  
+> \* Customization is a walk in the park, you are highly encouraged to merge helpful improvements.
 
-### Greenhouse Platform (10 companies)
+### Greenhouse Platform
 - **Stripe** - Global payments, excellent visa sponsorship
 - **GitLab** - All-remote company
 - **Coinbase** - Global crypto exchange
@@ -74,7 +67,7 @@ Results will be written to:
 - **Reddit** - Remote-first culture
 - **Lyft** - Good sponsorship track record
 
-### Lever Platform (10 companies)
+### Lever Platform
 - **Netflix** - Global streaming giant
 - **Spotify** - European HQ, global remote-friendly
 - **Airbnb** - Global platform
@@ -89,11 +82,11 @@ Results will be written to:
 ## Why These Companies?
 
 Personal preferences aside, all selected companies have:
-- ✅ Strong track record of visa sponsorship
-- ✅ Global or remote-first culture  
-- ✅ Active hiring in target locations (Canada, EU, APAC, etc.)
-- ✅ Engineering-focused roles
-- ✅ Transparent about remote work policies
+- Strong track record of visa sponsorship
+- Global or remote-first culture  
+- Active hiring in target locations (Canada, EU, APAC, etc.)
+- Engineering-focused roles
+- Transparent about remote work policies
 
 ## Extensions & Pull Requests
 
