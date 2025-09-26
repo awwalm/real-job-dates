@@ -2,6 +2,7 @@
 linearset.py
 *.xlsx
 rotations.py
+/greenhouse/from_frontend.py
 
 *.sublime-project
 *.sublime-workspace

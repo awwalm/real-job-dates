@@ -12,12 +12,13 @@ COMPANIES = {
     'lyft': 'lyft',              # Your original, good sponsorship
     'gitlab': 'gitlab',          # All-remote company
     'coinbase': 'coinbase',      # Global presence, sponsors visas
-    'doordash': 'doordash',      # Expanding globally, sponsors
+    'tripadvisor': 'tripadvisor',
     'robinhood': 'robinhood',    # Growing international presence
     'twilio': 'twilio',          # Global offices, remote-friendly
     'databricks': 'databricks',  # Global presence, sponsors visas
-    'canva': 'canva',            # Australia-based, global remote
+    'snapmobileinc': 'snapmobileinc',
     'reddit': 'reddit',          # Remote-first culture
+    'pinterest': 'pinterest',
 }
 
 API_URL_BASE = "https://job-boards.greenhouse.io/embed/job_app?for={}&token="
@@ -60,6 +61,7 @@ def search(query: list[str], filters: dict[str, list[str]]):
     return titles_matched and locations_matched
 
 
+failed_companies = []
 def get_all_jobs(company):
     """
     Fetch all jobs from the Greenhouse jobs API and filter payload locally.
@@ -73,6 +75,7 @@ def get_all_jobs(company):
         data = response.json()
     except Exception as e:
         print(f"  ❌ Failed to fetch jobs for {company}: {e}")
+        failed_companies.append(company)
         return []
 
     jobs = []
@@ -83,11 +86,14 @@ def get_all_jobs(company):
                 "Title": job["title"],
                 "Location": job["location"]["name"],
                 "URL": job["absolute_url"],
-                "Token": job["id"]
+                "Token": job["id"],
+                "Date Published": get_formatted_date(job["first_published"]),
+                "Date Updated": get_formatted_date(job["updated_at"]),
             })
     return jobs
 
 
+# @TODO: No longer needed
 def get_published_date(company, token):
     """
     Fetch the 'published_at' date for a given job token.
@@ -118,17 +124,27 @@ def get_published_date(company, token):
     except requests.exceptions.RequestException as e:
         print(f"    ⚠️  Error fetching date for token {token}: {e}")
         return "Date not found"
+    
+
+def get_formatted_date(raw_date):
+    # Handle both with and without milliseconds, with timezone
+    try:
+        parsed = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S.%f%z")
+    except ValueError:
+        parsed = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S%z")
+
+    return parsed.strftime("%Y-%m-%d")
 
 
 def save_to_csv(jobs, company):
     """
     Save job list to company-specific CSV file.
     """
-    filename = f"greenhouse_{company}_jobs.csv"
+    filename = f"greenhouse_api_{company}_jobs.csv"
     file_exists = os.path.isfile(filename)
     
     with open(filename, "a", newline="", encoding="utf-8") as f:
-        fieldnames = ["Company", "Title", "Token", "Location", "URL", "Date Published"]
+        fieldnames = ["Company", "Title", "Token", "Location", "URL", "Date Published", "Date Updated"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
         if not file_exists or os.stat(filename).st_size == 0:
@@ -154,10 +170,7 @@ def process_company(company):
     # Get publication dates
     final_jobs = []
     for i, job in enumerate(all_jobs, 1):
-        print(f"  [{i:2d}/{len(all_jobs)}] {job['Title'][:40]:<40} ... ", end="")
-        pub_date = get_published_date(company, job["Token"])
-        print(pub_date)
-        job["Date Published"] = pub_date
+        print(f"  [{i:2d}/{len(all_jobs)}] {job['Title'][:40]:<40} ...  Published: {job['Date Published']}  Updated: {job['Date Updated']}")
         final_jobs.append(job)
         
         # Small delay to be respectful to the API
@@ -209,6 +222,7 @@ def main():
     print(f"\n🎯 FINAL SUMMARY")
     print("=" * 30)
     print(f"Companies processed: {successful_companies}/{len(COMPANIES)}")
+    if len(failed_companies) > 1: print(*failed_companies, sep="\n")
     print(f"Total jobs scraped: {total_jobs}")
     print(f"CSV files created: greenhouse_[company]_jobs.csv")
     

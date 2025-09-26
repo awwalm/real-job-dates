@@ -6,8 +6,10 @@ from datetime import datetime
 
 # --- Configuration ---
 COMPANIES = {'lyft': 'lyft', 'stripe': 'stripe'}
-ORG = COMPANIES.get(input(f"Enter a company name (must be one of {list(COMPANIES.keys())}): ").lower())
-if not ORG: ORG = 'stripe'
+UNFILTERED_COMPANIES = {'airbnb'}
+# ORG = COMPANIES.get(input(f"Enter a company name (must be one of {list(COMPANIES.keys())}): ").lower())
+ORG = input(f"Enter a company name (e.g.: {list(COMPANIES.keys())}): ").lower()
+if not ORG or ORG == '': ORG = 'stripe'
 CSV_FILE = f"{ORG}_jobs_from_api.csv"
 JOBS_API_URL = f"https://boards-api.greenhouse.io/v1/boards/{ORG}/jobs"
 API_URL_BASE = f"https://job-boards.greenhouse.io/embed/job_app?for={ORG}&token="
@@ -27,46 +29,29 @@ SEARCH_FILTERS = {
 }
 
 
-
 def search(query: list[str], filters: dict[str, list[str]]):
     title_q = query[0]
     location_q = query[1]
     titles_matched = False
     locations_matched = False
-    for title, location in zip(filters['titles'], filters['locations']):
-        if not titles_matched and title.lower() in title_q.lower():
+    
+    for title in filters['titles']:
+        if title.lower() in title_q.lower():
             titles_matched = True
-        if not locations_matched and location.lower() in location_q.lower():
+            break
+    
+    for location in filters['locations']:
+        if location.lower() in location_q.lower():
             locations_matched = True
-        if locations_matched and titles_matched:
-            return True
+            break
+            
     return titles_matched and locations_matched
 
 
-def get_all_jobs():
+# @TODO: No longer needed
+def get_published_date(token, regstr):
     """
-    Fetch all jobs from the Greenhouse jobs API and filter payload locally.
-    Returns a list of dicts with Title, Location, URL, and Token.
-    """
-    response = requests.get(JOBS_API_URL, timeout=10)
-    response.raise_for_status()
-    data = response.json()
-
-    jobs = []
-    for job in data.get("jobs", []):
-        if search(query=[job['title'], job["location"]["name"]], filters=SEARCH_FILTERS):
-            jobs.append({
-                "Title": job["title"],
-                "Location": job["location"]["name"],
-                "URL": job["absolute_url"],
-                "Token": job["id"]
-            })
-    return jobs
-
-
-def get_published_date(token):
-    """
-    Fetch the 'published_at' date for a given job token.
+    Fetch the `published_at` and `updated_at` dates for a given job token.
     Returns a formatted YYYY-MM-DD string or 'Date not found'.
     """
     api_url = f"{API_URL_BASE}{token}"
@@ -74,7 +59,7 @@ def get_published_date(token):
         response = requests.get(api_url, timeout=10)
         response.raise_for_status()
 
-        match = re.search(r'"published_at":\s*"([^"]+)"', response.text)
+        match = re.search(regstr, response.text)
         if match:
             raw_date = match.group(1)
 
@@ -88,8 +73,43 @@ def get_published_date(token):
         else:
             return "Date not found"
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching published_at for {token}: {e}")
+        print(f"Error fetching published_at or updated_at for {token}: {e}")
         return "Date not found"
+
+
+def get_formatted_date(raw_date):
+    # Handle both with and without milliseconds, with timezone
+    try:
+        parsed = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S.%f%z")
+    except ValueError:
+        parsed = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S%z")
+
+    return parsed.strftime("%Y-%m-%d")
+    
+
+def get_all_jobs():
+    """
+    Fetch all jobs from the Greenhouse jobs API and filter payload locally.
+    Returns a list of dicts with Title, Location, URL, and Token.
+    """
+    response = requests.get(JOBS_API_URL, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+
+    jobs = []
+    for job in data.get("jobs", []):
+        jobs_found = search(query=[job['title'], job["location"]["name"]], filters=SEARCH_FILTERS)
+        if not jobs_found and ORG in UNFILTERED_COMPANIES: jobs_found = True
+        if jobs_found:
+            jobs.append({
+                "Title": job["title"],
+                "Location": job["location"]["name"],
+                "URL": job["absolute_url"],
+                "Token": job["id"],
+                "Date Published": get_formatted_date(job["first_published"]),
+                "Date Updated": get_formatted_date(job["updated_at"]),
+            })
+    return jobs
 
 
 def save_to_csv(jobs, filename=CSV_FILE):
@@ -98,7 +118,7 @@ def save_to_csv(jobs, filename=CSV_FILE):
     """
     file_exists = os.path.isfile(filename)
     with open(filename, "a", newline="", encoding="utf-8") as f:
-        fieldnames = ["Title", "Token", "Location", "URL", "Date Published"]
+        fieldnames = ["Title", "Token", "Location", "URL", "Date Published", "Date Updated"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
         if not file_exists or os.stat(filename).st_size == 0:
@@ -115,9 +135,7 @@ def main():
     final_jobs = []
     for job in all_jobs:
         print(f"Fetching publish date for '{job['Title']}'...")
-        pub_date = get_published_date(job["Token"])
-        print(pub_date)
-        job["Date Published"] = pub_date
+        print("published: ", job["Date Published"], "updated: ", job["Date Updated"])
         final_jobs.append(job)
 
     print(f"Writing {len(final_jobs)} jobs to {CSV_FILE}...")
