@@ -101,14 +101,31 @@ def get_published_date(token: str, org: companies.OrgConfig):
             for fmt in ("%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%S%z"):
                 try:
                     parsed = datetime.strptime(raw_date, fmt)
-                    return parsed.strftime("%Y-%m-%d")
+                    
+                    # Original timezone (usually UTC for most APIs)
+                    original_tz = parsed.strftime("%Y-%m-%d %H:%M:%S %Z")
+                    
+                    # Convert to local timezone
+                    local_time = parsed.astimezone()
+                    local_tz = local_time.strftime("%Y-%m-%d %H:%M:%S %Z")
+                    
+                    return {
+                        'original': original_tz,
+                        'local': local_tz
+                    }
                 except ValueError:
                     pass
-        return "Date not found"
+        return {
+            'original': "Date not found",
+            'local': "Date not found"
+        }
     except requests.exceptions.RequestException as e:
         print(f"Error fetching published_at for {token}: {e}")
         print(f"date not found for {api_url}, using base date 1970-01-01...")
-        return "1970-01-01" #"Date not found"
+        return {
+            'original': "1970-01-01 00:00:00 UTC",
+            'local': "1970-01-01 00:00:00 UTC"
+        }
 
 
 def load_existing_tokens(filename):
@@ -166,7 +183,9 @@ def save_to_csv(jobs, org: companies.OrgConfig):
             if token in seen_tokens:
                 continue
             job["Token"] = token
-            job["Date Published"] = get_published_date(token, org)
+            date_info = get_published_date(token, org)
+            job["Date Published (Original)"] = date_info['original']
+            job["Date Published (Local)"] = date_info['local']
             new_jobs.append(job)
 
     if not new_jobs:
@@ -174,11 +193,11 @@ def save_to_csv(jobs, org: companies.OrgConfig):
         return
 
     new_jobs = sorted(new_jobs, reverse=True, key=lambda d: datetime.strptime(
-        d['Date Published'], "%Y-%m-%d"))
+        d['Date Published (Original)'].split(' ')[0], "%Y-%m-%d"))
 
     file_exists = os.path.isfile(file)
     with open(file, "a", newline="", encoding="utf-8") as f:
-        fieldnames = ["Token", "Title", "Location", "URL", "Date Published"]
+        fieldnames = ["Token", "Title", "Location", "URL", "Date Published (Original)", "Date Published (Local)"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
         if not file_exists or os.stat(file).st_size == 0:

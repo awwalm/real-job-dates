@@ -112,49 +112,21 @@ def get_all_jobs(company):
     jobs = []
     for job in data.get("jobs", []):
         if search(query=[job['title'], job["location"]["name"]], filters=SEARCH_FILTERS):
+            published_date = get_formatted_date(job["first_published"])
+            updated_date = get_formatted_date(job["updated_at"])
             jobs.append({
                 "Company": company.capitalize(),
                 "Title": job["title"],
                 "Location": job["location"]["name"],
                 "URL": job["absolute_url"],
                 "Token": job["id"],
-                "Date Published": get_formatted_date(job["first_published"]),
-                "Date Updated": get_formatted_date(job["updated_at"]),
+                "Date Published": published_date['original'],
+                "Local Date Published": published_date['local'],
+                "Date Updated": updated_date['original'],
+                "Local Date Updated": updated_date['local'],
             })
+            
     return jobs
-
-
-# @TODO: No longer needed
-def get_published_date(company, token):
-    """
-    Fetch the 'published_at' date for a given job token.
-    Returns a formatted YYYY-MM-DD string or 'Date not found'.
-    """
-    api_url = f"{API_URL_BASE.format(company)}{token}"
-    try:
-        response = requests.get(api_url, timeout=10)
-        response.raise_for_status()
-
-        match = re.search(r'"published_at":\s*"([^"]+)"', response.text)
-        if match:
-            raw_date = match.group(1)
-
-            # Handle both with and without milliseconds, with timezone
-            try:
-                parsed = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S.%f%z")
-            except ValueError:
-                try:
-                    parsed = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S%z")
-                except ValueError:
-                    # Try without timezone
-                    parsed = datetime.strptime(raw_date[:19], "%Y-%m-%dT%H:%M:%S")
-
-            return parsed.strftime("%Y-%m-%d")
-        else:
-            return "Date not found"
-    except requests.exceptions.RequestException as e:
-        print(f"    ⚠️  Error fetching date for token {token}: {e}")
-        return "Date not found"
     
 
 def get_formatted_date(raw_date):
@@ -163,8 +135,18 @@ def get_formatted_date(raw_date):
         parsed = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S.%f%z")
     except ValueError:
         parsed = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S%z")
-
-    return parsed.strftime("%Y-%m-%d")
+    # Original timezone (usually UTC for most APIs)
+    original_tz = parsed.strftime("%Y-%m-%d %H:%M:%S %Z")
+    
+    # Convert to local timezone
+    local_time = parsed.astimezone()  # Converts to system local timezone
+    local_tz = local_time.strftime("%Y-%m-%d %H:%M:%S %Z")
+    
+    return {
+        'original': original_tz,      # e.g., "2024-01-15 14:30:25 UTC"
+        'local': local_tz             # e.g., "2024-01-15 09:30:25 EST"
+    }
+    # return parsed.strftime("%Y-%m-%d")
 
 
 def save_to_csv(jobs, company):
@@ -175,7 +157,7 @@ def save_to_csv(jobs, company):
     file_exists = os.path.isfile(filename)
     
     with open(filename, "a", newline="", encoding="utf-8") as f:
-        fieldnames = ["Company", "Title", "Token", "Location", "URL", "Date Published", "Date Updated"]
+        fieldnames = ["Company", "Title", "Token", "Location", "URL", "Date Published", "Local Date Published", "Date Updated", "Local Date Updated"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
         if not file_exists or os.stat(filename).st_size == 0:
