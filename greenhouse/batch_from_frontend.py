@@ -16,7 +16,7 @@ import companies
 def get_driver():
     """Initialize a Chrome WebDriver."""
     options = webdriver.ChromeOptions()
-    # options.add_argument("--headless=new")  # comment this out if you want to see browser
+    options.add_argument("--headless=new")  # comment this out if you want to see browser
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     driver = webdriver.Chrome(options=options)
@@ -135,11 +135,26 @@ def save_to_csv(jobs, org: companies.OrgConfig):
 
     new_jobs = []
     for job in jobs:
+        location_words = set(job["Location"].lower().replace("remote", "").split(" "))
+
         # Custom location filtering (mainly in Airbnb's case which does not support location filtering)
         if org.is_use_exceptions():
-            location_words = set(job["Location"].lower().replace("remote", "").split(" "))
             org_locations: set = org.get_default_locations()
             if len(location_words.intersection(org_locations)) == 0:
+                continue
+        
+        # Senior roles exclusion filter
+        if org.is_exclude_senior_roles():
+            role_words = set(job["Title"].lower().split(" "))
+            excluded_roles = org.get_excluded_roles()
+            if len(role_words.intersection(excluded_roles)) > 0:
+                continue
+        
+        # Unwanted locations exclusion filter
+        if org.is_exclude_unwanted_locations():
+            excluded_locations = org.get_excluded_locations()
+            if len(excluded_locations.intersection(location_words)) > 0 and \
+                len(location_words.intersection(org_locations)) == 0:
                 continue
 
         url = job["URL"]
@@ -177,10 +192,10 @@ def save_to_csv(jobs, org: companies.OrgConfig):
 def main():
     search_kw = ['Engineer']
     orgs = [
-        companies.OrgConfig(name='snapmobileinc', keywords=search_kw),
-        companies.OrgConfig(name='stripe', keywords=search_kw),
-        companies.OrgConfig(name='lyft', keywords=search_kw),
-        companies.OrgConfig(name='airbnb', keywords=search_kw, use_exceptions=True),
+        companies.OrgConfig(name='snapmobileinc', keywords=search_kw, exclude_senior_roles=True),
+        companies.OrgConfig(name='stripe', keywords=search_kw, exclude_senior_roles=True),
+        companies.OrgConfig(name='lyft', keywords=search_kw, exclude_senior_roles=True),
+        companies.OrgConfig(name='airbnb', keywords=search_kw, special_exceptions=True, exclude_senior_roles=True),
     ]
     for org in orgs:
         try:

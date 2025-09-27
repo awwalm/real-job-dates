@@ -23,42 +23,73 @@ COMPANIES = {
 
 API_URL_BASE = "https://job-boards.greenhouse.io/embed/job_app?for={}&token="
 SEARCH_FILTERS = {
-    'titles': [
+    'titles': {
         'engineer', 'backend', 'back end', 'fullstack',
         'full stack', 'developer', 'python', 'javascript',
         'software engineer', 'senior engineer', 'staff engineer',
         'frontend', 'front end', 'mobile', 'ios', 'android'
-    ],
-    'locations': [
+    },
+    'locations': {
         'canada', 'ireland', 'dublin', 'toronto',
         'singapore', 'malaysia', 'kuala lumpur',
         'australia', 'sydney', 'new zealand',
         'london', 'romania', 'bucharest',
         'united kingdom', 'paris', 'france',
         'amsterdam', 'netherlands', 'melbourne',
-        'remote', 'worldwide', 'global', 'europe',
+        'worldwide', 'global', 'europe', # 'remote',
         'berlin', 'germany', 'stockholm', 'sweden'
-    ],
+    },
+    'excluded_roles': {
+        'senior', 'principal', 'manager', 'staff',
+        'sr', 'snr', 'sr.', 'snr.',
+        'director', 'lead',
+    },
+    'excluded_locations': {
+        'usa', 'u.s.a.', 'u.s.a', 'u.s.', 'u.s.', 'us',
+        'united states', 'united states of america',
+        'india', 'china', 'korea',
+    }
 }
 
 
-def search(query: list[str], filters: dict[str, list[str]]):
-    title_q = query[0]
-    location_q = query[1]
+def search(query: list[str], filters: dict[str, list[str]|set[str]]):
+    title_q = set(query[0].lower().split(" "))
+    location_q = set(query[1].lower().split(" "))
+
+    excluded_locations = filters['excluded_locations']
+    excluded_roles = filters['excluded_roles']
+    titles = filters['titles']
+    locations = filters['locations']
+
     titles_matched = False
     locations_matched = False
+    roles_exclusion_passed = True
+    locations_exclusion_passed = True
+
+    if len(excluded_locations.intersection(location_q)) > 0 and \
+        len(excluded_locations.intersection(locations)) == 0:
+        locations_exclusion_passed = False
+        return False
+
+    for role in excluded_roles:
+        if role in title_q:
+            roles_exclusion_passed = False
+            return False
     
-    for title in filters['titles']:
-        if title.lower() in title_q.lower():
+    for title in titles:
+        if title in title_q:
             titles_matched = True
             break
     
-    for location in filters['locations']:
-        if location.lower() in location_q.lower():
+    for location in locations:
+        if location in location_q:
             locations_matched = True
             break
             
-    return titles_matched and locations_matched
+    return titles_matched and \
+            locations_matched and \
+            roles_exclusion_passed and \
+            locations_exclusion_passed
 
 
 failed_companies = []
@@ -140,7 +171,7 @@ def save_to_csv(jobs, company):
     """
     Save job list to company-specific CSV file.
     """
-    filename = f"greenhouse_api_{company}_jobs.csv"
+    filename = f"from_api_gh_{company}_jobs.csv"
     file_exists = os.path.isfile(filename)
     
     with open(filename, "a", newline="", encoding="utf-8") as f:
@@ -224,11 +255,11 @@ def main():
     print(f"Companies processed: {successful_companies}/{len(COMPANIES)}")
     if len(failed_companies) > 1: print(*failed_companies, sep="\n")
     print(f"Total jobs scraped: {total_jobs}")
-    print(f"CSV files created: greenhouse_[company]_jobs.csv")
+    print(f"CSV files created: from_api_gh_[company]_jobs.csv")
     
     if total_jobs > 0:
         print(f"\n💡 Pro tip: You can combine all CSVs with:")
-        print(f"   cat greenhouse_*_jobs.csv | grep -v '^Company,Title' | sort -t, -k6 -r > all_greenhouse_jobs.csv")
+        print(f"   cat from_api_gh_*_jobs.csv | grep -v '^Company,Title' | sort -t, -k6 -r > from_api_gh_all_jobs.csv")
 
 
 if __name__ == "__main__":

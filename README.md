@@ -94,6 +94,10 @@ There are other mega-robust scrapers repo doing sort of the same thing as this o
 but not much attention is given to extracting the actual posting dates. If you can help
 with this, you are more than welcomed to make a PR.
 
+## Helpful Resources
+
+* https://www.jobscan.co/blog/greenhouse-ats-what-job-seekers-need-to-know
+
 ## Disclaimer
 
 THIS PROJECT IS FOR PERSONAL AND EDUCATIONAL USE. 
