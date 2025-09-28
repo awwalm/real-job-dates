@@ -10,14 +10,7 @@ import time
 COMPANIES = {
     'netflix': 'netflix',        # Global presence, excellent compensation
     'spotify': 'spotify',        # European HQ, global remote-friendly
-    'airbnb': 'airbnb',         # Global platform, sponsors visas
-    'figma': 'figma',           # Remote-first, global team
-    'notion': 'notion',         # Distributed team, visa friendly
-    'discord': 'discord',       # Remote culture, global hiring
-    'github': 'github',         # Microsoft-owned, global presence
-    'shopify': 'shopify',       # Canadian HQ, global offices
     'palantir': 'palantir',     # Global presence, sponsors visas
-    'mixpanel': 'mixpanel',     # Global analytics, remote-friendly
 }
 
 SEARCH_FILTERS = {
@@ -138,12 +131,32 @@ def get_published_date(company, job_id, job_url):
                 if created_at > 1e12:  # Milliseconds
                     created_at = created_at / 1000
                 parsed = datetime.fromtimestamp(created_at)
-                return parsed.strftime("%Y-%m-%d")
+                # Original timezone (usually UTC for most APIs)
+                original_tz = parsed.strftime("%Y-%m-%d %H:%M:%S %Z")
+                
+                # Convert to local timezone
+                local_time = parsed.astimezone()  # Converts to system local timezone
+                local_tz = local_time.strftime("%Y-%m-%d %H:%M:%S %Z")
+                
+                return {
+                    'original': original_tz,      # e.g., "2024-01-15 14:30:25 UTC"
+                    'local': local_tz             # e.g., "2024-01-15 09:30:25 EST"
+                }
             elif isinstance(created_at, str):
                 # Try to parse ISO format
                 try:
                     parsed = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                    return parsed.strftime("%Y-%m-%d")
+                        # Original timezone (usually UTC for most APIs)
+                    original_tz = parsed.strftime("%Y-%m-%d %H:%M:%S %Z")
+                    
+                    # Convert to local timezone
+                    local_time = parsed.astimezone()  # Converts to system local timezone
+                    local_tz = local_time.strftime("%Y-%m-%d %H:%M:%S %Z")
+                    
+                    return {
+                        'original': original_tz,      # e.g., "2024-01-15 14:30:25 UTC"
+                        'local': local_tz             # e.g., "2024-01-15 09:30:25 EST"
+                    }
                 except:
                     pass
         
@@ -177,7 +190,17 @@ def get_published_date(company, job_id, job_url):
                         if timestamp > 1e12:  # Milliseconds
                             timestamp = timestamp / 1000
                         parsed = datetime.fromtimestamp(timestamp)
-                        return parsed.strftime("%Y-%m-%d")
+                        # Original timezone (usually UTC for most APIs)
+                        original_tz = parsed.strftime("%Y-%m-%d %H:%M:%S %Z")
+                        
+                        # Convert to local timezone
+                        local_time = parsed.astimezone()  # Converts to system local timezone
+                        local_tz = local_time.strftime("%Y-%m-%d %H:%M:%S %Z")
+                        
+                        return {
+                            'original': original_tz,      # e.g., "2024-01-15 14:30:25 UTC"
+                            'local': local_tz             # e.g., "2024-01-15 09:30:25 EST"
+                        }
                     except:
                         pass
                     
@@ -190,7 +213,17 @@ def get_published_date(company, job_id, job_url):
                             for fmt in ["%B %d, %Y", "%b %d, %Y", "%Y-%m-%d", "%m/%d/%Y"]:
                                 try:
                                     parsed = datetime.strptime(date_str, fmt)
-                                    return parsed.strftime("%Y-%m-%d")
+                                    # Original timezone (usually UTC for most APIs)
+                                    original_tz = parsed.strftime("%Y-%m-%d %H:%M:%S %Z")
+                                    
+                                    # Convert to local timezone
+                                    local_time = parsed.astimezone()  # Converts to system local timezone
+                                    local_tz = local_time.strftime("%Y-%m-%d %H:%M:%S %Z")
+                                    
+                                    return {
+                                        'original': original_tz,      # e.g., "2024-01-15 14:30:25 UTC"
+                                        'local': local_tz             # e.g., "2024-01-15 09:30:25 EST"
+                                    }
                                 except:
                                     continue
                     except:
@@ -199,7 +232,10 @@ def get_published_date(company, job_id, job_url):
         except Exception as e:
             pass
     
-    return "Date not found"
+    return {
+        'original': "1970-01-01 00:00:00",
+        'local': "1970-01-01 00:00:00"
+    }
 
 
 def save_to_csv(jobs, company):
@@ -210,7 +246,7 @@ def save_to_csv(jobs, company):
     file_exists = os.path.isfile(filename)
     
     with open(filename, "a", newline="", encoding="utf-8") as f:
-        fieldnames = ["Company", "Title", "ID", "Team", "Location", "URL", "Date Published"]
+        fieldnames = ["Company", "Title", "ID", "Team", "Location", "URL", "Date Published", "Local Date Published"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
         if not file_exists or os.stat(filename).st_size == 0:
@@ -239,7 +275,8 @@ def process_company(company):
         print(f"  [{i:2d}/{len(all_jobs)}] {job['Title'][:40]:<40} ... ", end="")
         pub_date = get_published_date(company, job["ID"], job["URL"])
         print(pub_date)
-        job["Date Published"] = pub_date
+        job["Date Published"] = pub_date['original']
+        job["Local Date Published"] = pub_date['local']
         final_jobs.append(job)
         
         # Small delay to be respectful to the API
@@ -258,7 +295,7 @@ def process_company(company):
     save_to_csv(sorted_jobs, company)
     
     # Stats
-    dated_jobs = [j for j in sorted_jobs if j['Date Published'] != 'Date not found']
+    dated_jobs = [j for j in sorted_jobs if j['Date Published'] != '1970-01-01 00:00:00']
     print(f"  💾 Saved {len(sorted_jobs)} jobs to lever_{company}_jobs.csv")
     print(f"  📊 {len(dated_jobs)} with dates, {len(sorted_jobs) - len(dated_jobs)} without dates")
     

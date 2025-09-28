@@ -8,6 +8,7 @@ import time
 # --- Configuration ---
 # Companies using Greenhouse with strong visa sponsorship/remote culture
 COMPANIES = {
+    'mixpanel': 'mixpanel',
     'stripe': 'stripe',          # Global, excellent visa sponsorship
     'lyft': 'lyft',              # Your original, good sponsorship
     'gitlab': 'gitlab',          # All-remote company
