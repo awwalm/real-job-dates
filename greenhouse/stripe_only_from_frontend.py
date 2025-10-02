@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 # --- Configuration ---
-CSV_FILE = "stripe_jobs_from_browser.csv"
+CSV_FILE = os.getcwd() + "/greenhouse/from_frontend_gh_stripe_jobs.csv"
 INITIAL_JOBS_URL = (
     "https://stripe.com/jobs/search?"
     "query=Engineer"  # or query=Developer  or whatever you want

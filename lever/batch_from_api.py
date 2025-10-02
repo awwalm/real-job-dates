@@ -7,7 +7,9 @@ import time
 
 # --- Configuration ---
 # Companies using Lever with strong visa sponsorship/remote culture
+CSV_FILE = os.getcwd() + "/lever/data/from_api_lever_{}_jobs.csv"
 COMPANIES = {
+    'allegiantair': 'allegiantair',
     'netflix': 'netflix',        # Global presence, excellent compensation
     'spotify': 'spotify',        # European HQ, global remote-friendly
     'palantir': 'palantir',     # Global presence, sponsors visas
@@ -30,7 +32,9 @@ SEARCH_FILTERS = {
         'amsterdam', 'netherlands', 'melbourne',
         'remote', 'worldwide', 'global', 'europe',
         'berlin', 'germany', 'stockholm', 'sweden',
-        'montreal', 'vancouver', 'ottawa'
+        'montreal', 'vancouver', 'ottawa',
+        'riyadh', 'saudi', 'warsaw', 'poland', 'belgium',
+        'bangkok', 'thailand', 'ho chi minh', 'vietnam',
     ],
 }
 
@@ -242,7 +246,7 @@ def save_to_csv(jobs, company):
     """
     Save job list to company-specific CSV file.
     """
-    filename = f"lever_{company}_jobs.csv"
+    filename = CSV_FILE.format(company)  # f"lever_{company}_jobs.csv"
     file_exists = os.path.isfile(filename)
     
     with open(filename, "a", newline="", encoding="utf-8") as f:

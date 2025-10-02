@@ -7,7 +7,12 @@ import time
 
 # --- Configuration ---
 # Companies using Greenhouse with strong visa sponsorship/remote culture
+CSV_FILE = os.getcwd() + "/greenhouse/data/from_api_gh_{}_jobs.csv"
 COMPANIES = {
+    'yougov': 'yougov',
+    'datadog': 'datadog',
+    'eucalyptus': 'eucalyptus',
+    'rtbhouse': 'rtbhouse',
     'mixpanel': 'mixpanel',
     'stripe': 'stripe',          # Global, excellent visa sponsorship
     'lyft': 'lyft',              # Your original, good sponsorship
@@ -38,7 +43,8 @@ SEARCH_FILTERS = {
         'united kingdom', 'paris', 'france',
         'amsterdam', 'netherlands', 'melbourne',
         'worldwide', 'global', 'europe', # 'remote',
-        'berlin', 'germany', 'stockholm', 'sweden'
+        'berlin', 'germany', 'stockholm', 'sweden',
+        'riyadh', 'saudi', 'poland', 'warsaw', 'belgium',
     },
     'excluded_roles': {
         'senior', 'principal', 'manager', 'staff',
@@ -154,7 +160,7 @@ def save_to_csv(jobs, company):
     """
     Save job list to company-specific CSV file.
     """
-    filename = f"from_api_gh_{company}_jobs.csv"
+    filename = CSV_FILE.format(company)  # os.getcwd() + f"/greenhouse/vacancies/from_api_gh_{company}_jobs.csv"
     file_exists = os.path.isfile(filename)
     
     with open(filename, "a", newline="", encoding="utf-8") as f:
