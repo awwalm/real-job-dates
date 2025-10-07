@@ -8,7 +8,25 @@ import time
 # --- Configuration ---
 # Companies using Lever with strong visa sponsorship/remote culture
 CSV_FILE = os.getcwd() + "/lever/data/from_api_lever_{}_jobs.csv"
+FIELDNAMES = [
+    "Company", 
+    "Title", 
+    "ID", 
+    "Team", 
+    "Location", 
+    "URL", 
+    "Date Published", 
+    "Local Date Published"
+]
 COMPANIES = {
+    'oxylabs': 'oxylabs',
+    'binance': 'binance',
+    'rover': 'rover',
+    'todaytixgroup': 'todaytixgroup',
+    'margo-group': 'margo-group',
+    'myob-2': 'myob-2',
+    'animocabrands': 'animocabrands',
+    'kraken123': 'kraken123',
     'allegiantair': 'allegiantair',
     'netflix': 'netflix',        # Global presence, excellent compensation
     'spotify': 'spotify',        # European HQ, global remote-friendly
@@ -16,30 +34,46 @@ COMPANIES = {
 }
 
 SEARCH_FILTERS = {
-    'titles': [
-        'engineer', 'backend', 'back end', 'fullstack',
+    'titles': {
+        'engineer', 'backend', 'back end', 'fullstack', 'full-stack',
         'full stack', 'developer', 'python', 'javascript',
         'software engineer', 'senior engineer', 'staff engineer',
         'frontend', 'front end', 'mobile', 'ios', 'android',
         'devops', 'platform', 'infrastructure', 'data engineer'
-    ],
-    'locations': [
-        'canada', 'ireland', 'dublin', 'toronto',
+    },
+    'locations': {
+        'LT', 'IE', 'AU', 'SG', 'KSA', 'NZ', 'CA',
+        'ireland', 'dublin', 'athlone', 
+        'canada', 'toronto', 'vancouver', 'british columbia', 'ontario',
         'singapore', 'malaysia', 'kuala lumpur',
-        'australia', 'sydney', 'new zealand',
-        'london', 'romania', 'bucharest',
-        'united kingdom', 'paris', 'france',
-        'amsterdam', 'netherlands', 'melbourne',
-        'remote', 'worldwide', 'global', 'europe',
+        'australia', 'sydney', 'melbourne', 'brisbane',
+        'new south wales', 'new zealand', 'wellington', 'auckland',
+        'united kingdom', 'u.k.', 'uk', 'london', 'leeds', 'bristol', 
+        'belfast', 'eidinburgh', 'cardiff', 'manchester', 'birmingham',
+        'romania', 'bucharest', 'lithuania', 'vilnius',
+        'poland', 'warsaw', 'prague', 'czech', 'czechia',
+        'paris', 'france', 'belgium', 'bruges',
+        'amsterdam', 'netherlands',
+        'worldwide', 'global', 'europe', # 'remote',
         'berlin', 'germany', 'stockholm', 'sweden',
-        'montreal', 'vancouver', 'ottawa',
-        'riyadh', 'saudi', 'warsaw', 'poland', 'belgium',
+        'doha', 'qatar', 'muscat', 'oman', 'bahrain', 
+        'riyadh', 'saudi', 'arabia', 'ksa', 'kuwait',
         'bangkok', 'thailand', 'ho chi minh', 'vietnam',
-    ],
+    },
+    'excluded_roles': {
+        'senior', 'principal', 'manager', 'staff',
+        'sr ', 'snr', 'sr.', 'snr.',
+        'director', 'lead',
+    },
+    'excluded_locations': {
+        'usa', 'u.s.a.', 'u.s.a', 'u.s.', 'u.s', 'us',
+        'united states', 'united states of america',
+        'india', 'china', 'korea',
+    }
 }
 
 
-def search(query: list[str], filters: dict[str, list[str]]):
+def search_old(query: list[str], filters: dict[str, list[str]]):
     """
     Check if job title and location match our filter criteria.
     """
@@ -62,43 +96,87 @@ def search(query: list[str], filters: dict[str, list[str]]):
     return titles_matched and locations_matched
 
 
+def search(query: list[str], filters: dict[str, list[str]|set[str]]):
+    # return True 
+    title_q = set(re.split('\W+', query[0].lower()))  # set(query[0].lower().split(" "))
+    location_q = set(re.split('\W+', query[1].lower()))  # set(query[1].lower().split(" "))
+
+    excluded_locations = filters['excluded_locations']
+    excluded_roles = filters['excluded_roles']
+    titles = filters['titles']
+    locations = filters['locations']
+
+    titles_matched = False
+    locations_matched = False
+    roles_exclusion_passed = True
+    locations_exclusion_passed = True
+
+    if len(excluded_locations.intersection(location_q)) > 0 and \
+        len(excluded_locations.intersection(locations)) == 0:
+        locations_exclusion_passed = False
+        return False
+
+    for role in excluded_roles:
+        if role in title_q:
+            roles_exclusion_passed = False
+            return False
+    
+    for title in titles:
+        if title in title_q:
+            titles_matched = True
+            break
+    
+    for location in locations:
+        if location in location_q:
+            locations_matched = True
+            break
+    
+    # Debugging purposes
+    # print(f"""WHAT FAILED?
+    #       titles and locations: {title_q} :: {location_q}
+    #       title matched: {titles_matched}
+    #       location matched: {locations_matched}
+    #       roles exclusion passed: {roles_exclusion_passed}
+    #       locations exclusion passed: {locations_exclusion_passed}\n""")
+            
+    return titles_matched and \
+            locations_matched and \
+            roles_exclusion_passed and \
+            locations_exclusion_passed
+
+
 def get_all_jobs(company):
     """
     Fetch all jobs from the Lever jobs API and filter payload locally.
     Returns a list of dicts with Title, Location, URL, and ID.
     """
-    jobs_api_url = f"https://api.lever.co/v0/postings/{company}"
+    # jobs_api_url = f"https://api.lever.co/v0/postings/{company}"
     jobs_api_url_alt = f"https://api.lever.co/v0/postings/{company}?mode=json"
     
     jobs = []
     
     # Try primary API endpoint first
     try:
-        response = requests.get(jobs_api_url, timeout=15)
+        response = requests.get(jobs_api_url_alt, timeout=15)
         response.raise_for_status()
         data = response.json()
-    except Exception as e:
-        # Try alternative endpoint
-        try:
-            response = requests.get(jobs_api_url_alt, timeout=15)
-            response.raise_for_status()
-            data = response.json()
-        except Exception as e2:
-            print(f"  ❌ Failed to fetch jobs for {company}: {e}")
-            return []
+    except Exception as e2:
+        print(f"  ❌ Failed to fetch jobs for {company}: {e}")
+        return []
 
     for job in data:
         # Lever API structure
         title = job.get("text", "")
         
         # Location handling - Lever can have multiple locations
+        country = job.get("country")
         locations = job.get("categories", {}).get("location", [])
         if isinstance(locations, str):
             location_str = locations
         elif isinstance(locations, list) and locations:
             location_str = ", ".join(locations)
         else:
-            location_str = "Location not specified"
+            location_str = "Location not specified" if not country else country
         
         # Check if job matches our filters
         if search(query=[title, location_str], filters=SEARCH_FILTERS):
@@ -242,7 +320,7 @@ def get_published_date(company, job_id, job_url):
     }
 
 
-def save_to_csv(jobs, company):
+def save_to_csv_old(jobs, company):
     """
     Save job list to company-specific CSV file.
     """
@@ -250,13 +328,56 @@ def save_to_csv(jobs, company):
     file_exists = os.path.isfile(filename)
     
     with open(filename, "a", newline="", encoding="utf-8") as f:
-        fieldnames = ["Company", "Title", "ID", "Team", "Location", "URL", "Date Published", "Local Date Published"]
+        fieldnames = FIELDNAMES
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
         if not file_exists or os.stat(filename).st_size == 0:
             writer.writeheader()
 
         writer.writerows(jobs)
+
+
+def save_to_csv(jobs, company, clean_sweep=False):
+    """
+    Save or update job list to a company-specific CSV file.
+
+    - Deduplicates jobs by 'ID'
+    - Preserves 'Local Date Published' from existing rows (if present)
+    - If clean_sweep=True, overwrites the file completely without merging
+    """
+    filename = CSV_FILE.format(company)
+    fieldnames = FIELDNAMES
+
+    if not clean_sweep and os.path.isfile(filename):
+        # Step 1: Load existing data
+        existing = {}
+        with open(filename, "r", newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                existing[row["ID"]] = row
+
+        # Step 2: Merge — preserve 'Local Date Published' where possible
+        for job in jobs:
+            job_id = job["ID"]
+            if job_id in existing:
+                old_row = existing[job_id]
+                if old_row.get("Local Date Published"):
+                    job["Local Date Published"] = old_row["Local Date Published"]
+            existing[job_id] = job
+
+        merged_jobs = list(existing.values())
+
+    else:
+        # Clean sweep: just write what was passed in
+        merged_jobs = jobs
+
+    # Step 3: Write everything (overwrite mode)
+    with open(filename, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(merged_jobs)
+
+    print(f"Saved {len(merged_jobs)} unique jobs to {filename}{' (clean sweep)' if clean_sweep else ''}")
 
 
 def process_company(company):
@@ -296,7 +417,7 @@ def process_company(company):
     sorted_jobs = sorted(final_jobs, reverse=True, key=sort_key)
     
     # Save to CSV
-    save_to_csv(sorted_jobs, company)
+    save_to_csv(sorted_jobs, company, True)
     
     # Stats
     dated_jobs = [j for j in sorted_jobs if j['Date Published'] != '1970-01-01 00:00:00']
@@ -325,9 +446,6 @@ def main():
         except KeyboardInterrupt:
             print("\n\n⏹️  Scraping interrupted by user")
             break
-        except Exception as e:
-            print(f"  💥 Unexpected error processing {company}: {e}")
-            continue
     
     print(f"\n🎯 FINAL SUMMARY")
     print("=" * 30)

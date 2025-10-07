@@ -8,12 +8,27 @@ import time
 # --- Configuration ---
 # Companies using Greenhouse with strong visa sponsorship/remote culture
 CSV_FILE = os.getcwd() + "/greenhouse/data/from_api_gh_{}_jobs.csv"
+API_URL_BASE = "https://job-boards.greenhouse.io/embed/job_app?for={}&token="
+FIELDNAMES = [
+    "Company", 
+    "Title", 
+    "Token", 
+    "Location", 
+    "URL", 
+    "Date Published", 
+    "Local Date Published", 
+    "Date Updated", 
+    "Local Date Updated"
+]
 COMPANIES = {
+    'wpp': 'wpp',
+    'lighthouse': 'lighthouse',
     'yougov': 'yougov',
     'datadog': 'datadog',
     'eucalyptus': 'eucalyptus',
     'rtbhouse': 'rtbhouse',
     'mixpanel': 'mixpanel',
+    'agoda': 'agoda',            # Known for SEA relocation and visa sponsorship
     'stripe': 'stripe',          # Global, excellent visa sponsorship
     'lyft': 'lyft',              # Your original, good sponsorship
     'gitlab': 'gitlab',          # All-remote company
@@ -25,34 +40,42 @@ COMPANIES = {
     'snapmobileinc': 'snapmobileinc',
     'reddit': 'reddit',          # Remote-first culture
     'pinterest': 'pinterest',
+    'chanzuckerbergbiohub': 'chanzuckerbergbiohub',
+    'verkada': 'verkada',        # Pledges to get visa for offer receivers
+    'checkr': 'checkr',
+    'towerresearchcapital': 'towerresearchcapital',
 }
-
-API_URL_BASE = "https://job-boards.greenhouse.io/embed/job_app?for={}&token="
 SEARCH_FILTERS = {
     'titles': {
-        'engineer', 'backend', 'back end', 'fullstack',
+        'engineer', 'backend', 'back end', 'fullstack', 'full-stack',
         'full stack', 'developer', 'python', 'javascript',
         'software engineer', 'senior engineer', 'staff engineer',
         'frontend', 'front end', 'mobile', 'ios', 'android'
     },
     'locations': {
-        'canada', 'ireland', 'dublin', 'toronto',
+        'ireland', 'dublin', 'athlone', 
+        'canada', 'toronto', 'vancouver', 'british columbia', 'ontario',
         'singapore', 'malaysia', 'kuala lumpur',
-        'australia', 'sydney', 'new zealand',
-        'london', 'romania', 'bucharest',
-        'united kingdom', 'paris', 'france',
-        'amsterdam', 'netherlands', 'melbourne',
+        'australia', 'sydney', 'melbourne', 'brisbane',
+        'new south wales', 'new zealand', 'wellington', 'auckland',
+        'united kingdom', 'u.k.', 'uk', 'london', 'leeds', 'bristol', 
+        'belfast', 'eidinburgh', 'cardiff', 'manchester', 'birmingham',
+        'romania', 'bucharest', 'lithuania', 'vilnius',
+        'poland', 'warsaw', 'prague', 'czech', 'czechia',
+         'paris', 'france', 'belgium', 'bruges',
+        'amsterdam', 'netherlands',
         'worldwide', 'global', 'europe', # 'remote',
         'berlin', 'germany', 'stockholm', 'sweden',
-        'riyadh', 'saudi', 'poland', 'warsaw', 'belgium',
+        'doha', 'qatar', 'muscat', 'oman', 'bahrain', 
+        'riyadh', 'saudi', 'arabia', 'ksa', 'kuwait',
     },
     'excluded_roles': {
         'senior', 'principal', 'manager', 'staff',
-        'sr', 'snr', 'sr.', 'snr.',
+        'sr ', 'snr', 'sr.', 'snr.',
         'director', 'lead',
     },
     'excluded_locations': {
-        'usa', 'u.s.a.', 'u.s.a', 'u.s.', 'u.s.', 'us',
+        'usa', 'u.s.a.', 'u.s.a', 'u.s.', 'u.s', 'us',
         'united states', 'united states of america',
         'india', 'china', 'korea',
     }
@@ -60,8 +83,8 @@ SEARCH_FILTERS = {
 
 
 def search(query: list[str], filters: dict[str, list[str]|set[str]]):
-    title_q = set(query[0].lower().split(" "))
-    location_q = set(query[1].lower().split(" "))
+    title_q = set(re.split('\W+', query[0].lower()))  # set(query[0].lower().split(" "))
+    location_q = set(re.split('\W+', query[1].lower()))  # set(query[1].lower().split(" "))
 
     excluded_locations = filters['excluded_locations']
     excluded_roles = filters['excluded_roles']
@@ -156,7 +179,7 @@ def get_formatted_date(raw_date):
     # return parsed.strftime("%Y-%m-%d")
 
 
-def save_to_csv(jobs, company):
+def save_to_csv_old(jobs, company):
     """
     Save job list to company-specific CSV file.
     """
@@ -164,13 +187,56 @@ def save_to_csv(jobs, company):
     file_exists = os.path.isfile(filename)
     
     with open(filename, "a", newline="", encoding="utf-8") as f:
-        fieldnames = ["Company", "Title", "Token", "Location", "URL", "Date Published", "Local Date Published", "Date Updated", "Local Date Updated"]
+        fieldnames = FIELDNAMES
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
         if not file_exists or os.stat(filename).st_size == 0:
             writer.writeheader()
 
         writer.writerows(jobs)
+
+
+def save_to_csv(jobs, company, clean_sweep=False):
+    """
+    Save or update job list to a company-specific CSV file.
+
+    - Deduplicates jobs by 'ID'
+    - Preserves 'Local Date Published' from existing rows (if present)
+    - If clean_sweep=True, overwrites the file completely without merging
+    """
+    filename = CSV_FILE.format(company)
+    fieldnames = FIELDNAMES
+
+    if not clean_sweep and os.path.isfile(filename):
+        # Step 1: Load existing data
+        existing = {}
+        with open(filename, "r", newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                existing[row["ID"]] = row
+
+        # Step 2: Merge — preserve 'Local Date Published' where possible
+        for job in jobs:
+            job_id = job["ID"]
+            if job_id in existing:
+                old_row = existing[job_id]
+                if old_row.get("Local Date Published"):
+                    job["Local Date Published"] = old_row["Local Date Published"]
+            existing[job_id] = job
+
+        merged_jobs = list(existing.values())
+
+    else:
+        # Clean sweep: just write what was passed in
+        merged_jobs = jobs
+
+    # Step 3: Write everything (overwrite mode)
+    with open(filename, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(merged_jobs)
+
+    print(f"Saved {len(merged_jobs)} unique jobs to {filename}{' (clean sweep)' if clean_sweep else ''}")
 
 
 def process_company(company):
@@ -203,13 +269,15 @@ def process_company(company):
         except:
             return datetime.min
     
-    sorted_jobs = sorted(final_jobs, reverse=True, key=sort_key)
+    sorted_jobs = sorted(final_jobs, reverse=True, key=lambda d: datetime.strptime(
+        d['Date Published'][:-6], "%Y-%m-%d %H:%M:%S %Z"
+    ))  # sorted(final_jobs, reverse=True, key=sort_key)
     
     # Save to CSV
-    save_to_csv(sorted_jobs, company)
+    save_to_csv(sorted_jobs, company, True)
     
     # Stats
-    dated_jobs = [j for j in sorted_jobs if j['Date Published'] != 'Date not found']
+    dated_jobs = [j for j in sorted_jobs if '1970' not in j['Date Published']]
     print(f"  💾 Saved {len(sorted_jobs)} jobs to greenhouse_{company}_jobs.csv")
     print(f"  📊 {len(dated_jobs)} with dates, {len(sorted_jobs) - len(dated_jobs)} without dates")
     

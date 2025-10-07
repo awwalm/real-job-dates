@@ -10,7 +10,7 @@ UNFILTERED_COMPANIES = {'airbnb'}
 # ORG = COMPANIES.get(input(f"Enter a company name (must be one of {list(COMPANIES.keys())}): ").lower())
 ORG = input(f"Enter a company name (e.g.: {list(COMPANIES.keys())}): ").lower()
 if not ORG or ORG == '': ORG = 'stripe'
-CSV_FILE = f"gh_{ORG}_jobs_from_api.csv"
+CSV_FILE = os.getcwd() + f"greenhouse/data/gh_{ORG}_jobs_from_api.csv"
 JOBS_API_URL = f"https://boards-api.greenhouse.io/v1/boards/{ORG}/jobs"
 API_URL_BASE = f"https://job-boards.greenhouse.io/embed/job_app?for={ORG}&token="
 SEARCH_FILTERS = {
