@@ -19,6 +19,20 @@ FIELDNAMES = [
     "Local Date Published"
 ]
 COMPANIES = {
+    #  'mistral': 'mistral',
+    # 'bluematrix': 'bluematrix',
+    # 'eyeline': 'eyeline',
+    'apolloresearch': 'apolloresearch',
+    'influur': 'influur',
+    'payjoy': 'payjoy',
+    'pingwind': 'pingwind',
+    'loadsmart': 'loadsmart',
+    'bounteous': 'bounteous',
+    'vida': 'vida',
+    'brillio-2': 'brillio-2',
+    'the-sia-foundation': 'the-sia-foundation',
+    'symphony': 'symphony',
+    'bestEgg': 'bestEgg',
     'oxylabs': 'oxylabs',
     'binance': 'binance',
     'rover': 'rover',
@@ -42,12 +56,13 @@ SEARCH_FILTERS = {
         'devops', 'platform', 'infrastructure', 'data engineer'
     },
     'locations': {
-        'LT', 'IE', 'AU', 'SG', 'KSA', 'NZ', 'CA',
+        'LT', 'IE', 'AU', 'SG', 'KSA', 'NZ', 'CA', 'QC', 'VC', 'MB', 'BC', 
         'ireland', 'dublin', 'athlone', 
-        'canada', 'toronto', 'vancouver', 'british columbia', 'ontario',
+        'canada', 'toronto', 'vancouver', 'british columbia', 'montreal',
+        'ontario', 'halifax', 'nova scotia', 'edmonton', 'quebec',
         'singapore', 'malaysia', 'kuala lumpur',
         'australia', 'sydney', 'melbourne', 'brisbane',
-        'new south wales', 'new zealand', 'wellington', 'auckland',
+        'new south wales', 'nsw', 'new zealand', 'wellington', 'auckland',
         'united kingdom', 'u.k.', 'uk', 'london', 'leeds', 'bristol', 
         'belfast', 'eidinburgh', 'cardiff', 'manchester', 'birmingham',
         'romania', 'bucharest', 'lithuania', 'vilnius',
@@ -59,16 +74,17 @@ SEARCH_FILTERS = {
         'doha', 'qatar', 'muscat', 'oman', 'bahrain', 
         'riyadh', 'saudi', 'arabia', 'ksa', 'kuwait',
         'bangkok', 'thailand', 'ho chi minh', 'vietnam',
+        'johannesburg', 'south africa', 'tunisia', 'sychelles', 'mauritius',
     },
     'excluded_roles': {
         'senior', 'principal', 'manager', 'staff',
-        'sr ', 'snr', 'sr.', 'snr.',
-        'director', 'lead',
+        'sr ', 'sr', 'snr', 'sr.', 'snr.',
+        'director', 'lead', 'head', 'chief',
     },
     'excluded_locations': {
         'usa', 'u.s.a.', 'u.s.a', 'u.s.', 'u.s', 'us',
         'united states', 'united states of america',
-        'india', 'china', 'korea',
+        'india', 'china', 'korea', 'russia',
     }
 }
 
@@ -98,8 +114,8 @@ def search_old(query: list[str], filters: dict[str, list[str]]):
 
 def search(query: list[str], filters: dict[str, list[str]|set[str]]):
     # return True 
-    title_q = set(re.split('\W+', query[0].lower()))  # set(query[0].lower().split(" "))
-    location_q = set(re.split('\W+', query[1].lower()))  # set(query[1].lower().split(" "))
+    title_q = set(re.split('\W+', query[0].lower())).union(set(query[0].lower().split(" ")))
+    location_q = set(re.split('\W+', query[1].lower())).union(set(query[1].lower().split(" ")))
 
     excluded_locations = filters['excluded_locations']
     excluded_roles = filters['excluded_roles']
@@ -116,18 +132,18 @@ def search(query: list[str], filters: dict[str, list[str]|set[str]]):
         locations_exclusion_passed = False
         return False
 
-    for role in excluded_roles:
-        if role in title_q:
+    for role in title_q: # excluded_roles:
+        if role in excluded_roles: # title_q:
             roles_exclusion_passed = False
             return False
     
-    for title in titles:
-        if title in title_q:
+    for title in title_q: # titles:
+        if title in titles: # title_q:
             titles_matched = True
             break
     
-    for location in locations:
-        if location in location_q:
+    for location in location_q: # locations:
+        if location in locations: # location_q:
             locations_matched = True
             break
     
@@ -161,7 +177,7 @@ def get_all_jobs(company):
         response.raise_for_status()
         data = response.json()
     except Exception as e2:
-        print(f"  ❌ Failed to fetch jobs for {company}: {e}")
+        print(f"  ❌ Failed to fetch jobs for {company}: {e2}")
         return []
 
     for job in data:

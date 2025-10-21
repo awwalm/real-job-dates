@@ -21,6 +21,13 @@ FIELDNAMES = [
     "Local Date Updated"
 ]
 COMPANIES = {
+    'atomicmachines': 'atomicmachines',
+    'b2c2': 'b2c2',
+    'airbnb': 'airbnb',
+    'coursera': 'coursera',
+    'lightspeed': 'lightspeed',
+    'accenturefederalservices': 'accenturefederalservices',
+    # 'akunacapital': 'akunacapital',
     'wpp': 'wpp',
     'lighthouse': 'lighthouse',
     'yougov': 'yougov',
@@ -53,8 +60,10 @@ SEARCH_FILTERS = {
         'frontend', 'front end', 'mobile', 'ios', 'android'
     },
     'locations': {
+     'LT', 'IE', 'AU', 'SG', 'KSA', 'NZ', 'CA', 'QC', 'MB', 'BC', 
         'ireland', 'dublin', 'athlone', 
-        'canada', 'toronto', 'vancouver', 'british columbia', 'ontario',
+        'canada', 'toronto', 'vancouver', 'british columbia', 'montreal',
+        'ontario', 'halifax', 'nova scotia', 'edmonton', 'quebec',
         'singapore', 'malaysia', 'kuala lumpur',
         'australia', 'sydney', 'melbourne', 'brisbane',
         'new south wales', 'new zealand', 'wellington', 'auckland',
@@ -62,29 +71,31 @@ SEARCH_FILTERS = {
         'belfast', 'eidinburgh', 'cardiff', 'manchester', 'birmingham',
         'romania', 'bucharest', 'lithuania', 'vilnius',
         'poland', 'warsaw', 'prague', 'czech', 'czechia',
-         'paris', 'france', 'belgium', 'bruges',
+        'paris', 'france', 'belgium', 'bruges',
         'amsterdam', 'netherlands',
         'worldwide', 'global', 'europe', # 'remote',
         'berlin', 'germany', 'stockholm', 'sweden',
         'doha', 'qatar', 'muscat', 'oman', 'bahrain', 
         'riyadh', 'saudi', 'arabia', 'ksa', 'kuwait',
+        'bangkok', 'thailand', 'ho chi minh', 'vietnam',
+        'johannesburg', 'south africa', 'tunisia', 'sychelles', 'mauritius',
     },
     'excluded_roles': {
         'senior', 'principal', 'manager', 'staff',
-        'sr ', 'snr', 'sr.', 'snr.',
-        'director', 'lead',
+        'sr ', 'sr', 'snr', 'sr.', 'snr.',
+        'director', 'lead', 'head', 'chief',
     },
     'excluded_locations': {
         'usa', 'u.s.a.', 'u.s.a', 'u.s.', 'u.s', 'us',
         'united states', 'united states of america',
-        'india', 'china', 'korea',
+        'india', 'china', 'korea', 'russia',
     }
 }
 
 
 def search(query: list[str], filters: dict[str, list[str]|set[str]]):
-    title_q = set(re.split('\W+', query[0].lower()))  # set(query[0].lower().split(" "))
-    location_q = set(re.split('\W+', query[1].lower()))  # set(query[1].lower().split(" "))
+    title_q = set(re.split('\W+', query[0].lower())).union(set(query[0].lower().split(" ")))
+    location_q = set(re.split('\W+', query[1].lower())).union(set(query[1].lower().split(" ")))
 
     excluded_locations = filters['excluded_locations']
     excluded_roles = filters['excluded_roles']
@@ -101,18 +112,18 @@ def search(query: list[str], filters: dict[str, list[str]|set[str]]):
         locations_exclusion_passed = False
         return False
 
-    for role in excluded_roles:
-        if role in title_q:
+    for role in title_q: # excluded_roles:
+        if role in excluded_roles: # title_q:
             roles_exclusion_passed = False
             return False
     
-    for title in titles:
-        if title in title_q:
+    for title in title_q: # titles:
+        if title in titles: # title_q:
             titles_matched = True
             break
     
-    for location in locations:
-        if location in location_q:
+    for location in location_q: # locations:
+        if location in locations: # location_q:
             locations_matched = True
             break
             
