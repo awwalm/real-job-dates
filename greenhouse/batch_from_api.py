@@ -21,6 +21,34 @@ FIELDNAMES = [
     "Local Date Updated"
 ]
 COMPANIES = {
+    # 'addepar1': 'addepar1',  # NOT visa friendly !!!
+    'wehrtyou': 'wehrtyou',  # hudson river trading
+    'gradyent': 'gradyent',
+    'silvare': 'silvare',
+    'wolt': 'wolt',
+    'axicorpfinancialservicesptyltd': 'axicorpfinancialservicesptyltd',
+    'checkr': 'checkr',
+    'vividseatsllc': 'vividseatsllc',
+    'complyadvantage': 'complyadvantage',
+    'navvis': 'navvis',
+    'anthropic': 'anthropic',
+    'appian': 'appian',
+    'trustpilot': 'trustpilot',
+    'capco': 'capco',
+    'wrike': 'wrike',
+    'chalkinc': 'chalkinc',
+    # 'grafanalabs': 'grafanalabs',
+    'transcendinc': 'transcendinc',
+    'altium': 'altium',
+    'hubspot': 'hubspot',
+    'intercom': 'intercom',
+    'thoughtworks': 'thoughtworks',
+    'tamara': 'tamara',
+    'bolcomen': 'bolcomen',
+    'mavensecuritiesholdingltd': 'mavensecuritiesholdingltd',  # Registered UK sponsor
+    'polyai': 'polyai',
+    'sofiastars': 'sofiastars',
+    'oldmissioncapital': 'oldmissioncapital',
     'atomicmachines': 'atomicmachines',
     'b2c2': 'b2c2',
     'airbnb': 'airbnb',
@@ -37,7 +65,7 @@ COMPANIES = {
     'mixpanel': 'mixpanel',
     'agoda': 'agoda',            # Known for SEA relocation and visa sponsorship
     'stripe': 'stripe',          # Global, excellent visa sponsorship
-    'lyft': 'lyft',              # Your original, good sponsorship
+    'lyft': 'lyft',              # proritizes local talent; reluctant to offer sponsorship
     'gitlab': 'gitlab',          # All-remote company
     'coinbase': 'coinbase',      # Global presence, sponsors visas
     'tripadvisor': 'tripadvisor',
@@ -49,38 +77,144 @@ COMPANIES = {
     'pinterest': 'pinterest',
     'chanzuckerbergbiohub': 'chanzuckerbergbiohub',
     'verkada': 'verkada',        # Pledges to get visa for offer receivers
-    'checkr': 'checkr',
     'towerresearchcapital': 'towerresearchcapital',
 }
 SEARCH_FILTERS = {
     'titles': {
         'engineer', 'backend', 'back end', 'fullstack', 'full-stack',
-        'full stack', 'developer', 'python', 'javascript',
-        'software engineer', 'senior engineer', 'staff engineer',
-        'frontend', 'front end', 'mobile', 'ios', 'android'
+        'full stack', 'developer', 'python', 'django',
+        'javascript', 'node', 'nodejs', 'node.js', 
+        'software engineer', 'customer', 'platform', 'mobile',
+        'android', 'infrastructure', 'forward deployed', 
+        'support',
+        'support engineer', 'support analyst', 'system analyst',
+        'system support', 'software support', 'product support',
+        'tech support', 'technical support', 'support specialist',
     },
     'locations': {
-     'LT', 'IE', 'AU', 'SG', 'KSA', 'NZ', 'CA', 'QC', 'MB', 'BC', 
-        'ireland', 'dublin', 'athlone', 
-        'canada', 'toronto', 'vancouver', 'british columbia', 'montreal',
-        'ontario', 'halifax', 'nova scotia', 'edmonton', 'quebec',
-        'singapore', 'malaysia', 'kuala lumpur',
-        'australia', 'sydney', 'melbourne', 'brisbane',
-        'new south wales', 'new zealand', 'wellington', 'auckland',
+        # Generic
+        'flexible', 'worldwide', 'global', 'multiple', 'emea', 'apac',
+
+        # Scandinavia
+        'norway', 'sweden', 'finland', 'iceland', 'helsinki', 'denmark', 
+        'oslo', 'malmo',
+
+        # --- Lithuania ---
+        'LT', 'lithuania', 'vilnius', 'kaunas', 'klaipeda',
+
+        # --- Ireland ---
+        'IE', 'ireland', 'dublin', 'athlone', 'cork', 'limerick', 'galway', 'waterford',
+
+        # --- Australia ---
+        'AU', 'australia', 'sydney', 'melbourne', 'brisbane', 
+        'perth', 'adelaide', 'canberra', 'hobart', 'darwin', 
+        'new south wales', 'queensland', 'victoria',
+
+        # --- Singapore ---
+        'SG', 'singapore',
+
+        # --- Saudi Arabia ---
+        'KSA', 'ksa', 'saudi', 'arabia', 'riyadh', 'jeddah', 'dammam', 'khobar', 'mecca', 'medina',
+
+        # --- New Zealand ---
+        'NZ', 'new zealand', 'wellington', 'auckland', 'hamilton', 'christchurch', 'dunedin',
+
+        # --- Canada ---
+        'CA', 'QC', 'MB', 'BC', 'canada', 'ontario', 'british columbia', 'alberta',
+        'saskatchewan', 'manitoba', 'quebec', 'nova scotia', 'new brunswick', 'newfoundland',
+        'toronto', 'vancouver', 'montreal', 'edmonton', 'calgary', 'halifax', 'ottawa',
+        'winnipeg', 'victoria',
+
+        # --- United Kingdom ---
         'united kingdom', 'u.k.', 'uk', 'london', 'leeds', 'bristol', 
-        'belfast', 'eidinburgh', 'cardiff', 'manchester', 'birmingham',
-        'romania', 'bucharest', 'lithuania', 'vilnius',
-        'poland', 'warsaw', 'prague', 'czech', 'czechia',
-        'paris', 'france', 'belgium', 'bruges',
-        'amsterdam', 'netherlands',
-        'worldwide', 'global', 'europe', # 'remote',
-        'berlin', 'germany', 'stockholm', 'sweden',
-        'doha', 'qatar', 'muscat', 'oman', 'bahrain', 
-        'riyadh', 'saudi', 'arabia', 'ksa', 'kuwait',
-        'bangkok', 'thailand', 'ho chi minh', 'vietnam',
-        'johannesburg', 'south africa', 'tunisia', 'sychelles', 'mauritius',
+        'belfast', 'edinburgh', 'cardiff', 'manchester', 'birmingham', 
+        'glasgow', 'liverpool', 'newcastle', 'nottingham', 'sheffield',
+
+        # --- Romania ---
+        'romania', 'bucharest', 'cluj-napoca', 'iasi', 'timisoara', 'brasov',
+
+        # --- Poland ---
+        'poland', 'warsaw', 'krakow', 'wroclaw', 'poznan', 'gdansk', 'lodz',
+
+        # --- Czech Republic ---
+        'prague', 'czech', 'czechia', 'brno', 'ostrava', 'plzen',
+
+        # --- France ---
+        'france', 'paris', 'lyon', 'marseille', 'toulouse', 'lille',
+        'bordeaux', 'nice', 'nantes', 'strasbourg',
+
+        # --- Belgium ---
+        'belgium', 'bruges', 'brussels', 'ghent', 'antwerp', 'leuven',
+
+        # --- Netherlands ---
+        'amsterdam', 'netherlands', 'rotterdam', 'the hague', 'utrecht', 'eindhoven', 'groningen',
+
+        # --- Germany ---
+        'berlin', 'germany', 'munich', 'frankfurt', 'stuttgart', 'hamburg', 
+        'cologne', 'dusseldorf', 'dresden', 'leipzig',
+
+        # --- Sweden ---
+        'stockholm', 'sweden', 'gothenburg', 'malmo', 'uppsala', 'lund',
+
+        # --- Finland ---
+        'finland', 'helsinki', 'tampere', 'espoo', 'oulu',
+
+        # --- Denmark ---
+        'denmark', 'copenhagen', 'aarhus', 'odense', 'aalborg',
+
+        # --- Austria ---
+        'austria', 'vienna', 'graz', 'salzburg', 'innsbruck', 'linz',
+
+        # --- Switzerland ---
+        'switzerland', 'zurich', 'geneva', 'lausanne', 'basel', 'bern', 'lugano',
+
+        # --- Slovenia ---
+        'slovenia', 'ljubljana', 'maribor',
+
+        # --- Croatia ---
+        'croatia', 'zagreb', 'split', 'rijeka',
+
+        # --- Estonia ---
+        'estonia', 'tallinn', 'tartu', 'narva',
+
+        # --- Latvia ---
+        'latvia', 'riga', 'jelgava', 'daugavpils',
+
+        # --- Cyprus ---
+        'cyprus', 'nicosia', 'limassol', 'larnaca', 'paphos',
+
+        # --- Thailand ---
+        'bangkok', 'thailand', 'chiang mai', 'phuket', 'pattaya',
+
+        # --- Vietnam ---
+        'ho chi minh', 'vietnam', 'hanoi', 'da nang', 'can tho',
+
+        # --- Qatar / GCC residuals ---
+        'doha', 'qatar', 'muscat', 'oman', 'bahrain', 'kuwait', 'kuwait city',
+
+        # --- Africa* ---
+        'johannesburg', 'rsa', 'south africa', 'tunisia', 'tunis', 'seychelles', 'mahe', 'mauritius', 'port louis',
+
+        # --- Global / Remote ---
+        'worldwide', 'global', 'global remote', 'global/remote', 'remote/global',
+        
+        # --- Hungary ---
+        # 'hungary', 'budapest', 'szeged', 'debrecen',
+     
+        # --- Portugal ---
+        'portugal', 'lisbon', 'porto', 'braga', 'aveiro', 'coimbra',
+
+        # --- Spain ---
+        # 'spain', 'barcelona', 'madrid', 'valencia', 'malaga', 'seville', 'bilbao',
+        
+        # --- Slovakia ---
+        # 'slovakia', 'bratislava', 'kosice', 'presov',
+        
+        # --- Malaysia ---
+        # 'malaysia', 'kuala lumpur', 'selangor', 'penang', 'johor bahru', 'sabah', 'sarawak', 'malacca',
     },
     'excluded_roles': {
+        'android', 'frontend', 'front-end',
         'senior', 'principal', 'manager', 'staff',
         'sr ', 'sr', 'snr', 'sr.', 'snr.',
         'director', 'lead', 'head', 'chief',
@@ -172,10 +306,19 @@ def get_all_jobs(company):
 
 def get_formatted_date(raw_date):
     # Handle both with and without milliseconds, with timezone
+    is_good = False
     try:
         parsed = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S.%f%z")
+        is_good = True
     except ValueError:
         parsed = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S%z")
+        is_good = True
+    finally:
+        if not is_good:  # API returns garbage or `null` data values, just default to a fallback
+                return {
+            'original': "1970-01-01 00:00:00",
+            'local': "1970-01-01 00:00:00"
+        }
     # Original timezone (usually UTC for most APIs)
     original_tz = parsed.strftime("%Y-%m-%d %H:%M:%S %Z")
     
@@ -267,7 +410,7 @@ def process_company(company):
     # Get publication dates
     final_jobs = []
     for i, job in enumerate(all_jobs, 1):
-        print(f"  [{i:2d}/{len(all_jobs)}] {job['Title'][:40]:<40} ...  Published: {job['Date Published']}  Updated: {job['Date Updated']}")
+        print(f"  [{i:2d}/{len(all_jobs)}] {job['Title'][:60]:<60} ...  Published: {job['Local Date Published'][:20]}  Updated: {job['Local Date Updated'][:20]}  {job['URL']}")
         final_jobs.append(job)
         
         # Small delay to be respectful to the API
@@ -315,7 +458,7 @@ def main():
             print("\n\n⏹️  Scraping interrupted by user")
             break
         except Exception as e:
-            print(f"  💥 Unexpected error processing {company}: {e}")
+            print(f"  💥 Unexpected error processing {company}: {e, e.__traceback__.__str__}")
             continue
     
     print(f"\n🎯 FINAL SUMMARY")

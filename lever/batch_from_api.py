@@ -22,6 +22,30 @@ COMPANIES = {
     #  'mistral': 'mistral',
     # 'bluematrix': 'bluematrix',
     # 'eyeline': 'eyeline',
+    # 'fliff': 'fliff',
+    # 'breakwatertech': 'breakwatertech',
+    'lucidworks': 'lucidworks',
+    'infinit': 'infinit',
+    'rigetti': 'rigetti',
+    'provectus': 'provectus',
+    'wmg': 'wmg',
+    'oddin': 'oddin',
+    'getwingapp': 'getwingapp',
+    'lingarogroup': 'lingarogroup',
+    'veeva': 'veeva',
+    'superside': 'superside',
+    'magnetforensics': 'magnetforensics',
+    'voleon': 'voleon',
+    'enveda': 'enveda',
+    'ajax': 'ajax',
+    'animocabrands': 'animocabrands',
+    'turvo': 'turvo',
+    'viseven': 'viseven',
+    'economicmodeling': 'economicmodeling',
+    'alice-bob': 'alice-bob',
+    'mindbloom': 'mindbloom',
+    'zocks': 'zocks',
+    'welocalize': 'welocalize',
     'apolloresearch': 'apolloresearch',
     'influur': 'influur',
     'payjoy': 'payjoy',
@@ -50,33 +74,138 @@ COMPANIES = {
 SEARCH_FILTERS = {
     'titles': {
         'engineer', 'backend', 'back end', 'fullstack', 'full-stack',
-        'full stack', 'developer', 'python', 'javascript',
-        'software engineer', 'senior engineer', 'staff engineer',
-        'frontend', 'front end', 'mobile', 'ios', 'android',
-        'devops', 'platform', 'infrastructure', 'data engineer'
+        'full stack', 'developer', 'python', 'django',
+        'javascript', 'node', 'nodejs', 'node.js', 
+        'software engineer', 'customer', 'platform', 'mobile',
+        'android', 'infrastructure', 'forward deployed', 
+        'support',
+        'support engineer', 'support analyst', 'system analyst',
+        'system support', 'software support', 'product support',
+        'tech support', 'technical support', 'support specialist',
     },
     'locations': {
-        'LT', 'IE', 'AU', 'SG', 'KSA', 'NZ', 'CA', 'QC', 'VC', 'MB', 'BC', 
-        'ireland', 'dublin', 'athlone', 
-        'canada', 'toronto', 'vancouver', 'british columbia', 'montreal',
-        'ontario', 'halifax', 'nova scotia', 'edmonton', 'quebec',
-        'singapore', 'malaysia', 'kuala lumpur',
-        'australia', 'sydney', 'melbourne', 'brisbane',
-        'new south wales', 'nsw', 'new zealand', 'wellington', 'auckland',
+        # Generic
+        'flexible', 'worldwide', 'global', 'multiple', 'emea', 'apac',
+
+        # Scandinavia
+        'norway', 'sweden', 'finland', 'iceland', 'helsinki', 'denmark',
+        
+        # --- Lithuania ---
+        'LT', 'lithuania', 'vilnius', 'kaunas', 'klaipeda',
+
+        # --- Ireland ---
+        'IE', 'ireland', 'dublin', 'athlone', 'cork', 'limerick', 'galway', 'waterford',
+
+        # --- Australia ---
+        'AU', 'australia', 'sydney', 'melbourne', 'brisbane', 
+        'perth', 'adelaide', 'canberra', 'hobart', 'darwin', 
+        'new south wales', 'queensland', 'victoria',
+
+        # --- Singapore ---
+        'SG', 'singapore',
+
+        # --- Saudi Arabia ---
+        'KSA', 'ksa', 'saudi', 'arabia', 'riyadh', 'jeddah', 'dammam', 'khobar', 'mecca', 'medina',
+
+        # --- New Zealand ---
+        'NZ', 'new zealand', 'wellington', 'auckland', 'hamilton', 'christchurch', 'dunedin',
+
+        # --- Canada ---
+        'CA', 'QC', 'MB', 'BC', 'canada', 'ontario', 'british columbia', 'alberta',
+        'saskatchewan', 'manitoba', 'quebec', 'nova scotia', 'new brunswick', 'newfoundland',
+        'toronto', 'vancouver', 'montreal', 'edmonton', 'calgary', 'halifax', 'ottawa',
+        'winnipeg', 'victoria',
+
+        # --- United Kingdom ---
         'united kingdom', 'u.k.', 'uk', 'london', 'leeds', 'bristol', 
-        'belfast', 'eidinburgh', 'cardiff', 'manchester', 'birmingham',
-        'romania', 'bucharest', 'lithuania', 'vilnius',
-        'poland', 'warsaw', 'prague', 'czech', 'czechia',
-        'paris', 'france', 'belgium', 'bruges',
-        'amsterdam', 'netherlands',
-        'worldwide', 'global', 'europe', # 'remote',
-        'berlin', 'germany', 'stockholm', 'sweden',
-        'doha', 'qatar', 'muscat', 'oman', 'bahrain', 
-        'riyadh', 'saudi', 'arabia', 'ksa', 'kuwait',
-        'bangkok', 'thailand', 'ho chi minh', 'vietnam',
-        'johannesburg', 'south africa', 'tunisia', 'sychelles', 'mauritius',
+        'belfast', 'edinburgh', 'cardiff', 'manchester', 'birmingham', 
+        'glasgow', 'liverpool', 'newcastle', 'nottingham', 'sheffield',
+
+        # --- Romania ---
+        'romania', 'bucharest', 'cluj-napoca', 'iasi', 'timisoara', 'brasov',
+
+        # --- Poland ---
+        'poland', 'warsaw', 'krakow', 'wroclaw', 'poznan', 'gdansk', 'lodz',
+
+        # --- Czech Republic ---
+        'prague', 'czech', 'czechia', 'brno', 'ostrava', 'plzen',
+
+        # --- France ---
+        'france', 'paris', 'lyon', 'marseille', 'toulouse', 'lille',
+        'bordeaux', 'nice', 'nantes', 'strasbourg',
+
+        # --- Belgium ---
+        'belgium', 'bruges', 'brussels', 'ghent', 'antwerp', 'leuven',
+
+        # --- Netherlands ---
+        'amsterdam', 'netherlands', 'rotterdam', 'the hague', 'utrecht', 'eindhoven', 'groningen',
+
+        # --- Germany ---
+        'berlin', 'germany', 'munich', 'frankfurt', 'stuttgart', 'hamburg', 
+        'cologne', 'dusseldorf', 'dresden', 'leipzig',
+
+        # --- Sweden ---
+        'stockholm', 'sweden', 'gothenburg', 'malmo', 'uppsala', 'lund',
+
+        # --- Finland ---
+        'finland', 'helsinki', 'tampere', 'espoo', 'oulu',
+
+        # --- Denmark ---
+        'denmark', 'copenhagen', 'aarhus', 'odense', 'aalborg',
+
+        # --- Austria ---
+        'austria', 'vienna', 'graz', 'salzburg', 'innsbruck', 'linz',
+
+        # --- Switzerland ---
+        'switzerland', 'zurich', 'geneva', 'lausanne', 'basel', 'bern', 'lugano',
+
+        # --- Slovenia ---
+        'slovenia', 'ljubljana', 'maribor',
+
+        # --- Croatia ---
+        'croatia', 'zagreb', 'split', 'rijeka',
+
+        # --- Estonia ---
+        'estonia', 'tallinn', 'tartu', 'narva',
+
+        # --- Latvia ---
+        'latvia', 'riga', 'jelgava', 'daugavpils',
+
+        # --- Cyprus ---
+        'cyprus', 'nicosia', 'limassol', 'larnaca', 'paphos',
+
+        # --- Thailand ---
+        'bangkok', 'thailand', 'chiang mai', 'phuket', 'pattaya',
+
+        # --- Vietnam ---
+        'ho chi minh', 'vietnam', 'hanoi', 'da nang', 'can tho',
+
+        # --- Qatar / GCC residuals ---
+        'doha', 'qatar', 'muscat', 'oman', 'bahrain', 'kuwait', 'kuwait city',
+
+        # --- Africa* ---
+        'johannesburg', 'rsa', 'south africa', 'tunisia', 'tunis', 'seychelles', 'mahe', 'mauritius', 'port louis',
+
+        # --- Global / Remote ---
+        'worldwide', 'global', 'global remote', 'global/remote', 'remote/global',
+        
+        # --- Hungary ---
+        # 'hungary', 'budapest', 'szeged', 'debrecen',
+     
+        # --- Portugal ---
+        'portugal', 'lisbon', 'porto', 'braga', 'aveiro', 'coimbra',
+
+        # --- Spain ---
+        # 'spain', 'barcelona', 'madrid', 'valencia', 'malaga', 'seville', 'bilbao',
+        
+        # --- Slovakia ---
+        # 'slovakia', 'bratislava', 'kosice', 'presov',
+        
+        # --- Malaysia ---
+        # 'malaysia', 'kuala lumpur', 'selangor', 'penang', 'johor bahru', 'sabah', 'sarawak', 'malacca',
     },
     'excluded_roles': {
+        'android', 'frontend', 'front-end',
         'senior', 'principal', 'manager', 'staff',
         'sr ', 'sr', 'snr', 'sr.', 'snr.',
         'director', 'lead', 'head', 'chief',
@@ -413,15 +542,15 @@ def process_company(company):
     # Get publication dates
     final_jobs = []
     for i, job in enumerate(all_jobs, 1):
-        print(f"  [{i:2d}/{len(all_jobs)}] {job['Title'][:40]:<40} ... ", end="")
+        print(f"  [{i:2d}/{len(all_jobs)}] {job['Title'][:40]:<40} ... \t", end="")
         pub_date = get_published_date(company, job["ID"], job["URL"])
-        print(pub_date)
+        print(pub_date.get('original'), job['URL'], sep="\t")
         job["Date Published"] = pub_date['original']
         job["Local Date Published"] = pub_date['local']
         final_jobs.append(job)
         
         # Small delay to be respectful to the API
-        time.sleep(0.7)  # Lever seems more rate-limited than Greenhouse
+        time.sleep(0.2)  # Lever seems more rate-limited than Greenhouse
     
     # Sort by date (most recent first)
     def sort_key(job):
